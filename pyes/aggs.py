@@ -384,7 +384,7 @@ class TermsAgg(BucketAgg):
         self.lang = lang
         self.all_terms = all_terms
         self.min_doc_count = int(min_doc_count) if min_doc_count else None
-
+    
     def _serialize(self):
         if not self.fields and not self.field and not self.script:
             raise RuntimeError("Field, Fields or Script is required:%s" % self.order)
@@ -421,6 +421,27 @@ class TermsAgg(BucketAgg):
             data['all_terms'] = self.all_terms
         if self.min_doc_count:
             data['min_doc_count'] = self.min_doc_count
+        return data
+
+class CardinalityAgg(Agg):
+
+    _internal_name = "cardinality"
+
+    def __init__(self, name, field=None, precision_threshold=100, **kwargs):
+        super(CardinalityAgg, self).__init__(name, **kwargs)
+        self.field = field
+        if precision_threshold > 40000:
+            precision_threshold = 40000
+        self.precision_threshold = precision_threshold
+
+
+    def _serialize(self):
+        if not self.field:
+            raise RuntimeError("Field is required:%s" % self.order)
+
+        data = {}
+        data['field'] = self.field
+        data['precision_threshold'] = self.precision_threshold
         return data
 
 
